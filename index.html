@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Card Game Tracker</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background: #ececec;
+        padding: 15px;
+      }
+
+      .container {
+        max-width: 500px;
+        margin: auto;
+      }
+
+      /* =========================
+   BOX
+========================= */
+
+      .tracker-box {
+        position: relative;
+        overflow: hidden;
+
+        border: 4px solid #000;
+        border-radius: 20px;
+
+        padding: 20px;
+        margin-bottom: 20px;
+
+        /* Ganti gambar di sini */
+        background-image: url("");
+        background-size: cover;
+        background-position: center;
+      }
+
+      .tracker-box::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.82);
+        backdrop-filter: blur(2px);
+      }
+
+      .tracker-box > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .title {
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 18px;
+      }
+
+      /* =========================
+   ENERGY TRACKER
+========================= */
+
+      .energy-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .energy-display {
+        width: 140px;
+        height: 90px;
+
+        border: 4px solid #000;
+        border-radius: 18px;
+
+        background: white;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        font-size: 56px;
+        font-weight: bold;
+
+        box-shadow:
+          0 6px 0 #000,
+          0 12px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .energy-limit {
+        text-align: center;
+        color: #666;
+        margin-bottom: 15px;
+      }
+
+      /* =========================
+   BUTTONS
+========================= */
+
+      .game-btn {
+        border: 3px solid #000;
+        border-radius: 12px;
+
+        background: white;
+
+        font-weight: bold;
+        cursor: pointer;
+
+        box-shadow: 0 5px 0 #000;
+
+        transition: all 0.08s ease;
+      }
+
+      .game-btn:active {
+        transform: translateY(5px);
+        box-shadow: none;
+      }
+
+      .side-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 34px;
+      }
+
+      /* tombol + */
+      .btn-plus {
+        background: #28a745;
+        color: white;
+        border-color: #1f7a34;
+        box-shadow: 0 5px 0 #1f7a34;
+      }
+
+      /* tombol - */
+      .btn-minus {
+        background: #dc3545;
+        color: white;
+        border-color: #a71d2a;
+        box-shadow: 0 5px 0 #a71d2a;
+      }
+
+      .quick-controls {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      .quick-controls .game-btn {
+        height: 60px;
+        font-size: 24px;
+      }
+
+      /* -7 */
+      .btn-orange {
+        background: #fd7e14;
+        color: white;
+        border-color: #c45f0a;
+        box-shadow: 0 5px 0 #c45f0a;
+      }
+
+      /* -3 */
+      .btn-red {
+        background: #dc3545;
+        color: white;
+        border-color: #a71d2a;
+        box-shadow: 0 5px 0 #a71d2a;
+      }
+
+      /* +3 */
+      .btn-green {
+        background: #28a745;
+        color: white;
+        border-color: #1f7a34;
+        box-shadow: 0 5px 0 #1f7a34;
+      }
+
+      /* =========================
+   POWER TRACKER
+========================= */
+
+      .power-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+
+      .power-input {
+        width: 100%;
+        height: 60px;
+
+        border: 3px solid #000;
+        border-radius: 12px;
+
+        background: white;
+
+        text-align: center;
+
+        font-size: 28px;
+        font-weight: bold;
+
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: textfield;
+
+        outline: none;
+      }
+
+      .power-main {
+        background: #ff9ac4;
+        border-color: #d63384;
+
+        box-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
+      }
+
+      .power-label {
+        text-align: center;
+        margin-top: 12px;
+        color: #d63384;
+        font-weight: bold;
+      }
+
+      /* =========================
+   MOBILE
+========================= */
+
+      @media (max-width: 480px) {
+        .side-btn {
+          width: 60px;
+          height: 60px;
+          font-size: 28px;
+        }
+
+        .energy-display {
+          width: 120px;
+          height: 80px;
+          font-size: 48px;
+        }
+
+        .quick-controls .game-btn {
+          height: 55px;
+          font-size: 20px;
+        }
+
+        .power-input {
+          height: 55px;
+          font-size: 24px;
+        }
+
+        .title {
+          font-size: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- ENERGY TRACKER -->
+      <div class="tracker-box">
+        <div class="title">ENERGY TRACKER</div>
+
+        <div class="energy-row">
+          <button
+            class="game-btn side-btn btn-minus"
+            onclick="changeEnergy(-1)"
+          >
+            −
+          </button>
+
+          <div class="energy-display" id="energyValue">0</div>
+
+          <button class="game-btn side-btn btn-plus" onclick="changeEnergy(1)">
+            +
+          </button>
+        </div>
+
+        <div class="energy-limit">Min 0 • Max 10</div>
+
+        <div class="quick-controls">
+          <button class="game-btn btn-red" onclick="changeEnergy(-3)">
+            -3
+          </button>
+
+          <button class="game-btn btn-orange" onclick="changeEnergy(-7)">
+            -7
+          </button>
+
+          <button class="game-btn btn-green" onclick="changeEnergy(3)">
+            +3
+          </button>
+        </div>
+      </div>
+
+      <!-- POWER TRACKER -->
+      <div class="tracker-box">
+        <div class="title">POWER TRACKER</div>
+
+        <div class="power-grid">
+          <input
+            class="power-input"
+            type="text"
+            inputmode="numeric"
+            value="0"
+          />
+
+          <input
+            class="power-input power-main"
+            type="text"
+            inputmode="numeric"
+            value="0"
+          />
+
+          <input
+            class="power-input"
+            type="text"
+            inputmode="numeric"
+            value="0"
+          />
+
+          <input
+            class="power-input"
+            type="text"
+            inputmode="numeric"
+            value="0"
+          />
+
+          <input
+            class="power-input"
+            type="text"
+            inputmode="numeric"
+            value="0"
+          />
+
+          <input
+            class="power-input"
+            type="text"
+            inputmode="numeric"
+            value="0"
+          />
+        </div>
+
+        <div class="power-label">VANGUARD POWER</div>
+      </div>
+    </div>
+
+    <script>
+      /* =========================
+   ENERGY
+========================= */
+
+      let energy = parseInt(localStorage.getItem("energyTracker")) || 0;
+
+      function updateEnergy() {
+        document.getElementById("energyValue").textContent = energy;
+
+        localStorage.setItem("energyTracker", energy);
+      }
+
+      function changeEnergy(amount) {
+        energy += amount;
+
+        if (energy > 10) energy = 10;
+        if (energy < 0) energy = 0;
+
+        updateEnergy();
+      }
+
+      updateEnergy();
+
+      /* =========================
+   POWER TRACKER
+========================= */
+
+      const inputs = document.querySelectorAll(".power-input");
+
+      inputs.forEach((input, index) => {
+        const saved = localStorage.getItem("power_" + index);
+
+        if (saved !== null) {
+          input.value = saved;
+        }
+
+        input.addEventListener("focus", () => {
+          input.select();
+        });
+
+        input.addEventListener("click", () => {
+          input.select();
+        });
+
+        input.addEventListener("input", () => {
+          input.value = input.value.replace(/[^0-9]/g, "");
+
+          localStorage.setItem("power_" + index, input.value);
+        });
+      });
+    </script>
+  </body>
+</html>
