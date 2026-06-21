@@ -449,6 +449,59 @@
       transform: translateY(4px);
     }
 
+    .over-trigger-btn {
+      width: 100%;
+      height: 48px;
+      font-size: 16px;
+      background: #fff;
+      color: #000;
+      border: 3px solid #000;
+      border-radius: 12px;
+      box-shadow: 0 4px 0 #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.08s ease;
+    }
+
+    .over-trigger-btn:active {
+      transform: translateY(4px);
+      box-shadow: none;
+    }
+
+    .over-trigger-btn.active {
+      background: linear-gradient(270deg, #ff4757, #ff6b81, #ffd700, #28a745, #007bff, #b39700, #ff4757) !important;
+      background-size: 400% 400% !important;
+      animation: rainbow-glow 6s ease infinite !important;
+      color: white !important;
+      border-color: #000 !important;
+      box-shadow: 0 4px 0 #000 !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    }
+
+    @keyframes rainbow-glow {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .power-input.over-trigger {
+      background: linear-gradient(270deg, #ff4757, #ff6b81, #ffd700, #28a745, #007bff, #b39700, #ff4757) !important;
+      background-size: 400% 400% !important;
+      animation: rainbow-glow 6s ease infinite !important;
+      color: white !important;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+      border-color: #000 !important;
+      box-shadow: 0 0 15px rgba(255, 105, 180, 0.8) !important;
+    }
+
     /* =========================
    MOBILE
 ========================= */
@@ -588,6 +641,13 @@
         </div>
       </div>
 
+      <!-- Over Trigger -->
+      <div class="modal-field" style="margin-top: 16px;">
+        <button id="modalOverTriggerBtn" class="game-btn over-trigger-btn" onclick="toggleModalOverTrigger()">
+          OVER TRIGGER
+        </button>
+      </div>
+
       <!-- Action buttons -->
       <div class="modal-actions" style="margin-top: 20px;">
         <button class="game-btn btn-cancel" onclick="closeModal(false)">Batal</button>
@@ -637,12 +697,12 @@
 
     // State structure for each of the 6 power trackers
     let powerStates = [
-      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0 },
-      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0 },
-      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0 },
-      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0 },
-      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0 },
-      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0 }
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false },
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false },
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false },
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false },
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false },
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false }
     ];
 
     let personaActive = localStorage.getItem("personaActive") === "true";
@@ -653,7 +713,7 @@
     for (let i = 0; i < 6; i++) {
       const savedState = localStorage.getItem("power_state_" + i);
       if (savedState !== null) {
-        powerStates[i] = JSON.parse(savedState);
+        powerStates[i] = { overTrigger: false, ...JSON.parse(savedState) };
       } else {
         // Migration from old simple values
         const legacyVal = localStorage.getItem("power_" + i);
@@ -679,6 +739,12 @@
 
         input.value = displayVal;
         localStorage.setItem("power_" + index, displayVal);
+
+        if (state.overTrigger) {
+          input.classList.add("over-trigger");
+        } else {
+          input.classList.remove("over-trigger");
+        }
       });
     }
 
@@ -730,6 +796,7 @@
         powerStates[i].buttonAccumulator = 0;
         powerStates[i].plusPower = 0;
         powerStates[i].minusPower = 0;
+        powerStates[i].overTrigger = false;
         saveState(i);
       }
 
@@ -754,6 +821,7 @@
       modalPlusInput.value = tempState.plusPower || "";
       modalMinusInput.value = tempState.minusPower || "";
 
+      updateModalOverTriggerBtn();
       updateModalTotal();
       modal.classList.add("open");
     }
@@ -774,6 +842,20 @@
     function adjustAccumulator(amount) {
       tempState.buttonAccumulator += amount;
       updateModalTotal();
+    }
+
+    function toggleModalOverTrigger() {
+      tempState.overTrigger = !tempState.overTrigger;
+      updateModalOverTriggerBtn();
+    }
+
+    function updateModalOverTriggerBtn() {
+      const btn = document.getElementById("modalOverTriggerBtn");
+      if (tempState.overTrigger) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
     }
 
     function closeModal(saveChanges) {
