@@ -1,0 +1,1235 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Card Game Tracker</title>
+
+  <link href="https://fonts.cdnfonts.com/css/chinacat" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #ececec;
+      padding: 15px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+    }
+
+    /* =========================
+   BOX
+========================= */
+
+    .tracker-box {
+      position: relative;
+      overflow: hidden;
+
+      border: 4px solid #000;
+      border-radius: 20px;
+
+      padding: 20px;
+      margin-bottom: 10px;
+
+      /* Ganti gambar di sini */
+      background-image: url("");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .tracker-box::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(2px);
+    }
+
+    .tracker-box>* {
+      position: relative;
+      z-index: 1;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 18px;
+    }
+
+    /* =========================
+   ENERGY TRACKER
+========================= */
+
+    .energy-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .energy-display {
+      width: 140px;
+      height: 90px;
+
+      border: 4px solid #000;
+      border-radius: 18px;
+
+      background: white;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      font-size: 56px;
+      font-weight: bold;
+
+      box-shadow:
+        0 6px 0 #000,
+        0 12px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .energy-limit {
+      text-align: center;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    /* =========================
+   BUTTONS
+========================= */
+
+    .game-btn {
+      border: 3px solid #000;
+      border-radius: 12px;
+
+      background: white;
+
+      font-weight: bold;
+      cursor: pointer;
+
+      box-shadow: 0 5px 0 #000;
+
+      transition: all 0.08s ease;
+    }
+
+    .game-btn:active {
+      transform: translateY(5px);
+      box-shadow: none;
+    }
+
+    .side-btn {
+      width: 70px;
+      height: 70px;
+      font-size: 34px;
+    }
+
+    /* tombol + */
+    .btn-plus {
+      background: #28a745;
+      color: white;
+      border-color: #1f7a34;
+      box-shadow: 0 5px 0 #1f7a34;
+    }
+
+    /* tombol - */
+    .btn-minus {
+      background: #dc3545;
+      color: white;
+      border-color: #a71d2a;
+      box-shadow: 0 5px 0 #a71d2a;
+    }
+
+    .quick-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .quick-controls .game-btn {
+      height: 50px;
+      font-size: 24px;
+    }
+
+    /* -7 */
+    .btn-orange {
+      background: #fd7e14;
+      color: white;
+      border-color: #c45f0a;
+      box-shadow: 0 5px 0 #c45f0a;
+    }
+
+    /* -3 */
+    .btn-red {
+      background: #dc3545;
+      color: white;
+      border-color: #a71d2a;
+      box-shadow: 0 5px 0 #a71d2a;
+    }
+
+    /* +3 */
+    .btn-green {
+      background: #28a745;
+      color: white;
+      border-color: #1f7a34;
+      box-shadow: 0 5px 0 #1f7a34;
+    }
+
+    /* =========================
+   POWER TRACKER
+========================= */
+
+    .power-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .power-input {
+      width: 100%;
+      height: 50px;
+
+      border: 3px solid #000;
+      border-radius: 12px;
+
+      background: white;
+
+      text-align: center;
+
+      font-size: 28px;
+      font-weight: bold;
+
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: textfield;
+
+      outline: none;
+    }
+
+    .power-main {
+      background: #ff9ac4;
+      border-color: #d63384;
+
+      box-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
+    }
+
+    .power-label {
+      text-align: center;
+      /* margin-top: 12px; */
+      color: #d63384;
+      font-weight: bold;
+    }
+
+    /* =========================
+   PERSONA & END TURN BUTTONS
+========================= */
+
+    .front-trigger-btn {
+      width: 100%;
+      height: 50px;
+      font-size: 20px;
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #ff4757, #ff6b81);
+      color: white;
+      border-color: #000;
+      box-shadow: 0 5px 0 #9e1c28;
+    }
+
+    .front-trigger-btn:hover {
+      background: linear-gradient(135deg, #ff6b81, #ff8797);
+    }
+
+    @keyframes power-flash {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+        transform: scale(1);
+      }
+
+      50% {
+        box-shadow: 0 0 20px 8px rgba(255, 71, 87, 0.9);
+        transform: scale(1.04);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
+        transform: scale(1);
+      }
+    }
+
+    .flash-animation {
+      animation: power-flash 0.6s ease-out;
+      border-color: #ff4757 !important;
+    }
+
+    /* =========================
+   NUMBER COUNT ANIMATION
+========================= */
+
+    /* Tint overlay saat angka sedang menghitung naik */
+    @keyframes num-counting-up {
+      0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+      }
+
+      15% {
+        box-shadow: 0 0 0 6px rgba(40, 167, 69, 0.45);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+      }
+    }
+
+    /* Tint overlay saat angka sedang menghitung turun */
+    @keyframes num-counting-down {
+      0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+      }
+
+      15% {
+        box-shadow: 0 0 0 6px rgba(220, 53, 69, 0.45);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+      }
+    }
+
+    .num-counting-up {
+      animation: num-counting-up 0.75s ease-out forwards !important;
+      color: #1a7a31 !important;
+    }
+
+    .num-counting-down {
+      animation: num-counting-down 0.75s ease-out forwards !important;
+      color: #a71d2a !important;
+    }
+
+    .persona-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .persona-btn {
+      width: 100%;
+      height: 50px;
+      font-size: 18px;
+      letter-spacing: 1px;
+      background: #f8f9fa;
+      color: #333;
+      border-color: #000;
+      box-shadow: 0 5px 0 #000;
+    }
+
+    .persona-btn.active {
+      background: #ffd700 !important;
+      color: #000 !important;
+      border-color: #000 !important;
+      box-shadow: 0 5px 0 #b39700 !important;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+
+    /* BOOST BUTTONS */
+    .boost-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .boost-btn {
+      width: 100%;
+      height: 48px;
+      font-size: 15px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      background: #f8f9fa;
+      color: #333;
+      border: 3px solid #000;
+      border-radius: 12px;
+      box-shadow: 0 5px 0 #000;
+      cursor: pointer;
+      transition: all 0.08s ease;
+    }
+
+    .boost-btn:active {
+      transform: translateY(5px);
+      box-shadow: none;
+    }
+
+    .boost-btn.active {
+      background: #ff6b35 !important;
+      color: #fff !important;
+      border-color: #c44b15 !important;
+      box-shadow: 0 5px 0 #c44b15 !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .power-input.boost-active {
+      background: #fff3cd !important;
+      border-color: #ff6b35 !important;
+      color: #c44b15 !important;
+      box-shadow: 0 0 12px rgba(255, 107, 53, 0.5) !important;
+    }
+
+    .end-turn-btn {
+      width: 100%;
+      height: 50px;
+      font-size: 20px;
+      margin-top: 5px;
+      letter-spacing: 1px;
+      background: #007bff;
+      color: white;
+      border-color: #0056b3;
+      box-shadow: 0 5px 0 #0056b3;
+    }
+
+    .end-turn-btn:active {
+      transform: translateY(5px);
+      box-shadow: none;
+    }
+
+    /* =========================
+   MODAL POPUP
+========================= */
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: #fff;
+      border: 4px solid #000;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 400px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      transform: scale(0.9);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-overlay.open .modal-box {
+      transform: scale(1);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 3px solid #000;
+      padding-bottom: 10px;
+    }
+
+    .modal-total-display {
+      text-align: center;
+      font-size: 40px;
+      font-weight: bold;
+      background: #fff;
+      border: 3px solid #000;
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 20px;
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .modal-field {
+      margin-bottom: 16px;
+    }
+
+    .modal-field label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #000;
+    }
+
+    .modal-input {
+      width: 100%;
+      height: 48px;
+      border: 3px solid #000;
+      border-radius: 10px;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      outline: none;
+    }
+
+    .modal-input:focus {
+      border-color: #007bff;
+    }
+
+    .modal-quick-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .modal-quick-grid .game-btn {
+      height: 45px;
+      font-size: 15px;
+    }
+
+    .modal-modifiers-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .modal-actions .game-btn {
+      height: 48px;
+      font-size: 16px;
+    }
+
+    .btn-cancel {
+      background: #6c757d;
+      color: white;
+      border-color: #545b62;
+      box-shadow: 0 4px 0 #545b62;
+    }
+
+    .btn-cancel:active {
+      box-shadow: none;
+      transform: translateY(4px);
+    }
+
+    .btn-ok {
+      background: #28a745;
+      color: white;
+      border-color: #1f7a34;
+      box-shadow: 0 4px 0 #1f7a34;
+    }
+
+    .btn-ok:active {
+      box-shadow: none;
+      transform: translateY(4px);
+    }
+
+    .over-trigger-btn {
+      width: 100%;
+      height: 48px;
+      font-size: 16px;
+      background: #fff;
+      color: #000;
+      border: 3px solid #000;
+      border-radius: 12px;
+      box-shadow: 0 4px 0 #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.08s ease;
+    }
+
+    .over-trigger-btn:active {
+      transform: translateY(4px);
+      box-shadow: none;
+    }
+
+    .over-trigger-btn.active {
+      background: linear-gradient(270deg, #ff4757, #ff6b81, #ffd700, #28a745, #007bff, #b39700, #ff4757) !important;
+      background-size: 400% 400% !important;
+      animation: rainbow-glow 6s ease infinite !important;
+      color: white !important;
+      border-color: #000 !important;
+      box-shadow: 0 4px 0 #000 !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    }
+
+    @keyframes rainbow-glow {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .power-input.over-trigger {
+      background: linear-gradient(270deg, #ff4757, #ff6b81, #ffd700, #28a745, #007bff, #b39700, #ff4757) !important;
+      background-size: 400% 400% !important;
+      animation: rainbow-glow 6s ease infinite !important;
+      color: white !important;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+      border-color: #000 !important;
+      box-shadow: 0 0 15px rgba(255, 105, 180, 0.8) !important;
+    }
+
+    /* =========================
+   COPYRIGHT BAR
+========================= */
+
+    .copyright-bar {
+      text-align: center;
+      margin-bottom: 10px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      box-shadow:
+        0 4px 0 rgba(0, 0, 0, 0.4),
+        0 8px 24px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .copyright-bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ffd700, #ff6b81, #007bff, transparent);
+      opacity: 0.7;
+    }
+
+    .copyright-bar-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .copyright-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .copyright-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.75);
+      letter-spacing: 0.5px;
+    }
+
+    .copyright-brand {
+      background: linear-gradient(90deg, #ffd700, #ff9ac4, #007bff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    .copyright-divider {
+      width: 1px;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .copyright-year {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.5px;
+    }
+
+    /* =========================
+   MOBILE
+========================= */
+
+    @media (max-width: 480px) {
+      .side-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+      }
+
+      .energy-display {
+        width: 120px;
+        height: 80px;
+        font-size: 48px;
+      }
+
+      .quick-controls .game-btn {
+        height: 50px;
+        font-size: 20px;
+      }
+
+      .power-input {
+        height: 50px;
+        font-size: 24px;
+      }
+
+      .title {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- ENERGY TRACKER -->
+    <div class="tracker-box">
+      <div class="title">ENERGY TRACKER</div>
+
+      <div class="energy-row">
+        <button class="game-btn side-btn btn-minus" onclick="changeEnergy(-1)">
+          −
+        </button>
+
+        <div class="energy-display" id="energyValue">0</div>
+
+        <button class="game-btn side-btn btn-plus" onclick="changeEnergy(1)">
+          +
+        </button>
+      </div>
+
+      <div class="energy-limit">Min 0 • Max 10</div>
+
+      <div class="quick-controls">
+        <button class="game-btn btn-red" onclick="changeEnergy(-3)">
+          -3
+        </button>
+
+        <button class="game-btn btn-orange" onclick="changeEnergy(-7)">
+          -7
+        </button>
+
+        <button class="game-btn btn-green" onclick="changeEnergy(3)">
+          +3
+        </button>
+      </div>
+    </div>
+
+    <!-- COPYRIGHT BAR -->
+    <div class="copyright-bar">
+      <div class="copyright-bar-content">
+        <span class="copyright-icon">🃏</span>
+        <span class="copyright-brand">VG Tracker</span>
+        <div class="copyright-divider"></div>
+        <span class="copyright-year">© 2026 MasariuMan | All Rights Reserved</span>
+      </div>
+    </div>
+
+    <!-- POWER TRACKER -->
+    <div class="tracker-box">
+      <div class="title">POWER TRACKER</div>
+
+      <button class="game-btn front-trigger-btn" id="frontTriggerBtn" onclick="triggerFrontTrigger()">
+        FRONT +5000
+      </button>
+
+      <div class="persona-row">
+        <button class="game-btn persona-btn" id="personaBtn10k" onclick="togglePersona('10k')">
+          PERSONA 10K
+        </button>
+        <button class="game-btn persona-btn" id="personaBtn15k" onclick="togglePersona('15k')">
+          PERSONA 15K
+        </button>
+      </div>
+
+      <div class="power-grid">
+        <input class="power-input" type="text" inputmode="numeric" value="0" />
+
+        <input class="power-input power-main" type="text" inputmode="numeric" value="0" />
+
+        <input class="power-input" type="text" inputmode="numeric" value="0" />
+
+        <input class="power-input" type="text" inputmode="numeric" value="0" />
+
+        <input class="power-input" type="text" inputmode="numeric" value="0" />
+
+        <input class="power-input" type="text" inputmode="numeric" value="0" />
+      </div>
+
+      <!-- BOOST BUTTONS -->
+      <div class="boost-row">
+        <button class="boost-btn" id="boostBtn3" onclick="toggleBoost(3)">⚡ BOOST</button>
+        <button class="boost-btn" id="boostBtn4" onclick="toggleBoost(4)">⚡ BOOST</button>
+        <button class="boost-btn" id="boostBtn5" onclick="toggleBoost(5)">⚡ BOOST</button>
+      </div>
+
+      <div class="power-label">VANGUARD POWER</div>
+
+      <button class="game-btn end-turn-btn" id="endTurnBtn" onclick="endTurn()">
+        END TURN
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL POPUP -->
+  <div id="powerModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title" id="modalTitle">EDIT POWER</div>
+
+      <!-- Total Power -->
+      <div class="modal-field">
+        <label>TOTAL POWER</label>
+        <div class="modal-total-display" id="modalTotalDisplay">0</div>
+      </div>
+
+      <!-- Base Power -->
+      <div class="modal-field">
+        <label>BASE POWER</label>
+        <input id="modalBasePower" class="modal-input" type="text" inputmode="numeric" value="0" />
+      </div>
+
+      <!-- Quick modifiers (+3000, +5000, +10000, -5000) -->
+      <div class="modal-quick-grid" style="grid-template-columns: repeat(4,1fr);">
+        <button class="game-btn btn-plus" onclick="adjustAccumulator(3000)">+3000</button>
+        <button class="game-btn btn-plus" onclick="adjustAccumulator(5000)">+5000</button>
+        <button class="game-btn btn-plus" onclick="adjustAccumulator(10000)">+10000</button>
+        <button class="game-btn btn-minus" onclick="adjustAccumulator(-5000)">-5000</button>
+      </div>
+
+      <!-- Custom modifiers (+Power, -Power) -->
+      <div class="modal-modifiers-row">
+        <div class="modal-field" style="margin-bottom: 0;">
+          <label>+ POWER (Manual)</label>
+          <input id="modalPlusPower" class="modal-input" type="text" inputmode="numeric" value="0" />
+        </div>
+        <div class="modal-field" style="margin-bottom: 0;">
+          <label>− POWER (Manual)</label>
+          <input id="modalMinusPower" class="modal-input" type="text" inputmode="numeric" value="0" />
+        </div>
+      </div>
+
+      <!-- Over Trigger -->
+      <div class="modal-field" style="margin-top: 16px;">
+        <button id="modalOverTriggerBtn" class="game-btn over-trigger-btn" onclick="toggleModalOverTrigger()">
+          OVER TRIGGER
+        </button>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button class="game-btn btn-cancel" onclick="closeModal(false)">Batal</button>
+        <button class="game-btn btn-ok" onclick="closeModal(true)">Oke</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================
+ ENERGY
+========================= */
+
+    let energy = parseInt(localStorage.getItem("energyTracker")) || 0;
+
+    /* ================================================================
+     COUNT-UP / COUNT-DOWN ANIMATION
+     ================================================================
+     countTo(el, fromVal, toVal, isInput, duration)
+     - el        : DOM element (div atau input)
+     - fromVal   : nilai awal (angka saat ini)
+     - toVal     : nilai tujuan
+     - isInput   : true → set el.value, false → set el.textContent
+     - duration  : durasi animasi dalam ms (default 700)
+
+     Menggunakan requestAnimationFrame untuk smooth counting.
+     WeakMap digunakan untuk membatalkan animasi sebelumnya jika
+     nilai berubah lagi sebelum animasi selesai.
+     ================================================================ */
+
+    const _rafIds = new WeakMap(); // menyimpan rAF ID yang sedang berjalan
+    const _targets = new WeakMap(); // menyimpan target value terakhir per elemen
+
+    function countTo(el, fromVal, toVal, isInput, duration) {
+      duration = duration || 700;
+
+      // Batalkan animasi sebelumnya jika masih berjalan
+      if (_rafIds.has(el)) {
+        cancelAnimationFrame(_rafIds.get(el));
+        _rafIds.delete(el);
+      }
+
+      if (fromVal === toVal) {
+        // Tidak ada perubahan – pastikan nilai final sudah terpasang
+        if (isInput) el.value = toVal;
+        else el.textContent = toVal;
+        return;
+      }
+
+      _targets.set(el, toVal);
+
+      // Tambahkan class warna selama counting berlangsung
+      el.classList.remove('num-counting-up', 'num-counting-down');
+      void el.offsetWidth; // force reflow agar animasi CSS bisa diulang
+      if (toVal > fromVal) el.classList.add('num-counting-up');
+      else el.classList.add('num-counting-down');
+
+      // Easing: ease-out quart  →  cepat di awal, melambat di akhir
+      function easeOutQuart(t) {
+        return 1 - Math.pow(1 - t, 4);
+      }
+
+      const startTime = performance.now();
+      const diff = toVal - fromVal;
+
+      function tick(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOutQuart(progress);
+        const current = Math.round(fromVal + diff * eased);
+
+        if (isInput) el.value = current;
+        else el.textContent = current;
+
+        if (progress < 1) {
+          _rafIds.set(el, requestAnimationFrame(tick));
+        } else {
+          // Pastikan nilai akhir tepat
+          if (isInput) el.value = toVal;
+          else el.textContent = toVal;
+
+          _rafIds.delete(el);
+
+          // Hapus class warna setelah animasi selesai
+          el.classList.remove('num-counting-up', 'num-counting-down');
+        }
+      }
+
+      _rafIds.set(el, requestAnimationFrame(tick));
+    }
+
+    function updateEnergy() {
+      const el = document.getElementById("energyValue");
+      const oldVal = _targets.has(el) ? _targets.get(el) : (parseInt(el.textContent) || 0);
+      _targets.set(el, energy);
+      countTo(el, oldVal, energy, false);
+      localStorage.setItem("energyTracker", energy);
+    }
+
+    function changeEnergy(amount) {
+      energy += amount;
+
+      if (energy > 10) energy = 10;
+      if (energy < 0) energy = 0;
+
+      updateEnergy();
+    }
+
+    updateEnergy();
+
+    /* =========================
+ POWER TRACKER & MODAL STATE
+========================= */
+
+    const inputs = document.querySelectorAll(".power-input");
+
+    const positionNames = [
+      "FRONT-LEFT REAR-GUARD",
+      "VANGUARD",
+      "FRONT-RIGHT REAR-GUARD",
+      "BACK-LEFT REAR-GUARD",
+      "BACK-CENTER REAR-GUARD",
+      "BACK-RIGHT REAR-GUARD"
+    ];
+
+    // State structure for each of the 6 power trackers
+    let powerStates = [
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false },
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false },
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false },
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false },
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false },
+      { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false }
+    ];
+
+    // personaActive: null = off, '10k' = 10k active, '15k' = 15k active
+    let personaActive = localStorage.getItem("personaActive") || null;
+    if (personaActive === "true") personaActive = "10k"; // migrate old value
+    if (personaActive === "false" || personaActive === "null") personaActive = null;
+
+    // boostActive[i]: true if boost for bottom row index i (3,4,5) is active
+    let boostActive = [false, false, false]; // index 0→tracker3, 1→tracker4, 2→tracker5
+
+    let currentEditingIndex = -1;
+    let tempState = {};
+
+    // Initialize state from local storage or legacy storage
+    for (let i = 0; i < 6; i++) {
+      const savedState = localStorage.getItem("power_state_" + i);
+      if (savedState !== null) {
+        powerStates[i] = { overTrigger: false, ...JSON.parse(savedState) };
+      } else {
+        // Migration from old simple values
+        const legacyVal = localStorage.getItem("power_" + i);
+        if (legacyVal !== null) {
+          powerStates[i].basePower = parseInt(legacyVal) || 0;
+        }
+      }
+    }
+
+    function saveState(index) {
+      localStorage.setItem("power_state_" + index, JSON.stringify(powerStates[index]));
+    }
+
+    function updateGridDisplay() {
+      inputs.forEach((input, index) => {
+        const state = powerStates[index];
+        const total = state.basePower + state.buttonAccumulator + state.plusPower - state.minusPower;
+
+        let personaBonus = 0;
+        if (personaActive === '10k' && index < 3) personaBonus = 10000;
+        if (personaActive === '15k' && index < 3) personaBonus = 15000;
+
+        // Calculate boost: bottom row (3,4,5) adds its total to the corresponding top row (0,1,2)
+        let boostBonus = 0;
+        if (index < 3 && boostActive[index]) {
+          const bottomState = powerStates[index + 3];
+          const bottomTotal = bottomState.basePower + bottomState.buttonAccumulator + bottomState.plusPower - bottomState.minusPower;
+          boostBonus = bottomTotal;
+        }
+
+        const displayVal = total + personaBonus + boostBonus;
+
+        // Baca fromVal dari target terakhir (bukan dari input.value yang mungkin
+        // masih di tengah animasi counting), agar counter mulai dari angka yang benar.
+        const fromVal = _targets.has(input) ? _targets.get(input) : (parseInt(input.value) || 0);
+        _targets.set(input, displayVal);
+        countTo(input, fromVal, displayVal, true);
+
+        localStorage.setItem("power_" + index, displayVal);
+
+        // Handle boost-active highlight for bottom row inputs
+        if (index >= 3 && boostActive[index - 3]) {
+          input.classList.add("boost-active");
+        } else {
+          input.classList.remove("boost-active");
+        }
+
+        if (state.overTrigger) {
+          input.classList.add("over-trigger");
+        } else {
+          input.classList.remove("over-trigger");
+        }
+      });
+    }
+
+    function updatePersonaBtns() {
+      const btn10k = document.getElementById("personaBtn10k");
+      const btn15k = document.getElementById("personaBtn15k");
+      btn10k.classList.toggle("active", personaActive === '10k');
+      btn15k.classList.toggle("active", personaActive === '15k');
+    }
+
+    function togglePersona(type) {
+      if (personaActive === type) {
+        personaActive = null;
+      } else {
+        personaActive = type;
+      }
+      localStorage.setItem("personaActive", personaActive);
+      updatePersonaBtns();
+      updateGridDisplay();
+    }
+
+    function toggleBoost(trackerIndex) {
+      // trackerIndex is the full index (3, 4, or 5)
+      const boostIdx = trackerIndex - 3;
+      boostActive[boostIdx] = !boostActive[boostIdx];
+      updateBoostBtns();
+      updateGridDisplay();
+    }
+
+    function updateBoostBtns() {
+      [3, 4, 5].forEach((trackerIndex) => {
+        const boostIdx = trackerIndex - 3;
+        const btn = document.getElementById("boostBtn" + trackerIndex);
+        btn.classList.toggle("active", boostActive[boostIdx]);
+      });
+    }
+
+    function triggerFrontTrigger() {
+      // Tambahkan +10000 ke accumulator dari 3 tracker power teratas (index 0, 1, 2)
+      for (let i = 0; i < 3; i++) {
+        powerStates[i].buttonAccumulator += 5000;
+        saveState(i);
+      }
+      updateGridDisplay();
+
+      // Trigger animasi flash untuk 3 input teratas
+      for (let i = 0; i < 3; i++) {
+        const inputEl = inputs[i];
+        inputEl.classList.remove("flash-animation");
+        void inputEl.offsetWidth; // Force reflow
+        inputEl.classList.add("flash-animation");
+
+        setTimeout(() => {
+          inputEl.classList.remove("flash-animation");
+        }, 600);
+      }
+    }
+
+    function endTurn() {
+      // Reset persona
+      personaActive = null;
+      localStorage.setItem("personaActive", null);
+      updatePersonaBtns();
+
+      // Reset boosts
+      boostActive = [false, false, false];
+      updateBoostBtns();
+
+      for (let i = 0; i < 6; i++) {
+        powerStates[i].buttonAccumulator = 0;
+        powerStates[i].plusPower = 0;
+        powerStates[i].minusPower = 0;
+        powerStates[i].overTrigger = false;
+        saveState(i);
+      }
+
+      updateGridDisplay();
+    }
+
+    // Modal Management
+    const modal = document.getElementById("powerModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalTotalDisplay = document.getElementById("modalTotalDisplay");
+    const modalBaseInput = document.getElementById("modalBasePower");
+    const modalPlusInput = document.getElementById("modalPlusPower");
+    const modalMinusInput = document.getElementById("modalMinusPower");
+
+    function openModal(index) {
+      currentEditingIndex = index;
+      tempState = { ...powerStates[index] };
+
+      modalTitle.textContent = "EDIT " + positionNames[index];
+
+      modalBaseInput.value = tempState.basePower;
+      modalPlusInput.value = tempState.plusPower || "";
+      modalMinusInput.value = tempState.minusPower || "";
+
+      updateModalOverTriggerBtn();
+      updateModalTotal();
+      modal.classList.add("open");
+    }
+
+    function updateModalTotal() {
+      const base = parseInt(modalBaseInput.value) || 0;
+      const plus = parseInt(modalPlusInput.value) || 0;
+      const minus = parseInt(modalMinusInput.value) || 0;
+
+      tempState.basePower = base;
+      tempState.plusPower = plus;
+      tempState.minusPower = minus;
+
+      const total = tempState.basePower + tempState.buttonAccumulator + tempState.plusPower - tempState.minusPower;
+      const el = modalTotalDisplay;
+      const fromVal = _targets.has(el) ? _targets.get(el) : (parseInt(el.textContent) || 0);
+      _targets.set(el, total);
+      countTo(el, fromVal, total, false, 600);
+    }
+
+    function adjustAccumulator(amount) {
+      tempState.buttonAccumulator += amount;
+      updateModalTotal();
+    }
+
+    function toggleModalOverTrigger() {
+      tempState.overTrigger = !tempState.overTrigger;
+      updateModalOverTriggerBtn();
+    }
+
+    function updateModalOverTriggerBtn() {
+      const btn = document.getElementById("modalOverTriggerBtn");
+      if (tempState.overTrigger) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    }
+
+    function closeModal(saveChanges) {
+      if (saveChanges && currentEditingIndex !== -1) {
+        powerStates[currentEditingIndex] = { ...tempState };
+        saveState(currentEditingIndex);
+        updateGridDisplay();
+      }
+      modal.classList.remove("open");
+      currentEditingIndex = -1;
+    }
+
+    // Close modal on outside click
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        closeModal(false);
+      }
+    });
+
+    // Bind events to modal inputs
+    function bindModalInputEvents(inputEl) {
+      inputEl.addEventListener("input", () => {
+        inputEl.value = inputEl.value.replace(/[^0-9]/g, "");
+        updateModalTotal();
+      });
+
+      inputEl.addEventListener("focus", () => {
+        inputEl.select();
+      });
+
+      inputEl.addEventListener("click", () => {
+        inputEl.select();
+      });
+    }
+
+    bindModalInputEvents(modalBaseInput);
+    bindModalInputEvents(modalPlusInput);
+    bindModalInputEvents(modalMinusInput);
+
+    // Initialize inputs and click handlers
+    inputs.forEach((input, index) => {
+      input.setAttribute("readonly", true);
+
+      input.addEventListener("click", () => {
+        openModal(index);
+      });
+    });
+
+    // Initial page load updates
+    updatePersonaBtns();
+    updateBoostBtns();
+    updateGridDisplay();
+  </script>
+</body>
+
+</html>
