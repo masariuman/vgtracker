@@ -277,16 +277,32 @@
 
     /* Tint overlay saat angka sedang menghitung naik */
     @keyframes num-counting-up {
-      0%   { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-      15%  { box-shadow: 0 0 0 6px rgba(40, 167, 69, 0.45); }
-      100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+      0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+      }
+
+      15% {
+        box-shadow: 0 0 0 6px rgba(40, 167, 69, 0.45);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+      }
     }
 
     /* Tint overlay saat angka sedang menghitung turun */
     @keyframes num-counting-down {
-      0%   { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-      15%  { box-shadow: 0 0 0 6px rgba(220, 53, 69, 0.45); }
-      100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+      0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+      }
+
+      15% {
+        box-shadow: 0 0 0 6px rgba(220, 53, 69, 0.45);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+      }
     }
 
     .num-counting-up {
@@ -359,7 +375,7 @@
       color: #fff !important;
       border-color: #c44b15 !important;
       box-shadow: 0 5px 0 #c44b15 !important;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     }
 
     .power-input.boost-active {
@@ -581,6 +597,78 @@
     }
 
     /* =========================
+   COPYRIGHT BAR
+========================= */
+
+    .copyright-bar {
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      box-shadow:
+        0 4px 0 rgba(0, 0, 0, 0.4),
+        0 8px 24px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .copyright-bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ffd700, #ff6b81, #007bff, transparent);
+      opacity: 0.7;
+    }
+
+    .copyright-bar-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .copyright-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .copyright-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.75);
+      letter-spacing: 0.5px;
+    }
+
+    .copyright-brand {
+      background: linear-gradient(90deg, #ffd700, #ff9ac4, #007bff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    .copyright-divider {
+      width: 1px;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .copyright-year {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.5px;
+    }
+
+    /* =========================
    MOBILE
 ========================= */
 
@@ -646,6 +734,18 @@
         <button class="game-btn btn-green" onclick="changeEnergy(3)">
           +3
         </button>
+      </div>
+    </div>
+
+    <!-- COPYRIGHT BAR -->
+    <div class="copyright-bar">
+      <div class="copyright-bar-content">
+        <span class="copyright-icon">🃏</span>
+        <span class="copyright-text">VG Tracker</span>
+        <div class="copyright-divider"></div>
+        <span class="copyright-brand">Cardfight!! Vanguard</span>
+        <div class="copyright-divider"></div>
+        <span class="copyright-year">© 2026 MasariuMan | All Rights Reserved</span>
       </div>
     </div>
 
@@ -769,8 +869,8 @@
      nilai berubah lagi sebelum animasi selesai.
      ================================================================ */
 
-    const _rafIds   = new WeakMap(); // menyimpan rAF ID yang sedang berjalan
-    const _targets  = new WeakMap(); // menyimpan target value terakhir per elemen
+    const _rafIds = new WeakMap(); // menyimpan rAF ID yang sedang berjalan
+    const _targets = new WeakMap(); // menyimpan target value terakhir per elemen
 
     function countTo(el, fromVal, toVal, isInput, duration) {
       duration = duration || 700;
@@ -794,7 +894,7 @@
       el.classList.remove('num-counting-up', 'num-counting-down');
       void el.offsetWidth; // force reflow agar animasi CSS bisa diulang
       if (toVal > fromVal) el.classList.add('num-counting-up');
-      else                 el.classList.add('num-counting-down');
+      else el.classList.add('num-counting-down');
 
       // Easing: ease-out quart  →  cepat di awal, melambat di akhir
       function easeOutQuart(t) {
@@ -805,20 +905,20 @@
       const diff = toVal - fromVal;
 
       function tick(now) {
-        const elapsed  = now - startTime;
+        const elapsed = now - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        const eased    = easeOutQuart(progress);
-        const current  = Math.round(fromVal + diff * eased);
+        const eased = easeOutQuart(progress);
+        const current = Math.round(fromVal + diff * eased);
 
         if (isInput) el.value = current;
-        else         el.textContent = current;
+        else el.textContent = current;
 
         if (progress < 1) {
           _rafIds.set(el, requestAnimationFrame(tick));
         } else {
           // Pastikan nilai akhir tepat
           if (isInput) el.value = toVal;
-          else         el.textContent = toVal;
+          else el.textContent = toVal;
 
           _rafIds.delete(el);
 
@@ -831,7 +931,7 @@
     }
 
     function updateEnergy() {
-      const el     = document.getElementById("energyValue");
+      const el = document.getElementById("energyValue");
       const oldVal = _targets.has(el) ? _targets.get(el) : (parseInt(el.textContent) || 0);
       _targets.set(el, energy);
       countTo(el, oldVal, energy, false);
@@ -1053,9 +1153,9 @@
       tempState.plusPower = plus;
       tempState.minusPower = minus;
 
-      const total    = tempState.basePower + tempState.buttonAccumulator + tempState.plusPower - tempState.minusPower;
-      const el       = modalTotalDisplay;
-      const fromVal  = _targets.has(el) ? _targets.get(el) : (parseInt(el.textContent) || 0);
+      const total = tempState.basePower + tempState.buttonAccumulator + tempState.plusPower - tempState.minusPower;
+      const el = modalTotalDisplay;
+      const fromVal = _targets.has(el) ? _targets.get(el) : (parseInt(el.textContent) || 0);
       _targets.set(el, total);
       countTo(el, fromVal, total, false, 600);
     }
