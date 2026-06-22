@@ -271,11 +271,45 @@
       border-color: #ff4757 !important;
     }
 
+    /* =========================
+   NUMBER COUNT ANIMATION
+========================= */
+
+    /* Tint overlay saat angka sedang menghitung naik */
+    @keyframes num-counting-up {
+      0%   { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+      15%  { box-shadow: 0 0 0 6px rgba(40, 167, 69, 0.45); }
+      100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+    }
+
+    /* Tint overlay saat angka sedang menghitung turun */
+    @keyframes num-counting-down {
+      0%   { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+      15%  { box-shadow: 0 0 0 6px rgba(220, 53, 69, 0.45); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+
+    .num-counting-up {
+      animation: num-counting-up 0.75s ease-out forwards !important;
+      color: #1a7a31 !important;
+    }
+
+    .num-counting-down {
+      animation: num-counting-down 0.75s ease-out forwards !important;
+      color: #a71d2a !important;
+    }
+
+    .persona-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
     .persona-btn {
       width: 100%;
       height: 50px;
-      font-size: 20px;
-      margin-bottom: 15px;
+      font-size: 18px;
       letter-spacing: 1px;
       background: #f8f9fa;
       color: #333;
@@ -289,6 +323,50 @@
       border-color: #000 !important;
       box-shadow: 0 5px 0 #b39700 !important;
       text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+
+    /* BOOST BUTTONS */
+    .boost-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .boost-btn {
+      width: 100%;
+      height: 48px;
+      font-size: 15px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      background: #f8f9fa;
+      color: #333;
+      border: 3px solid #000;
+      border-radius: 12px;
+      box-shadow: 0 5px 0 #000;
+      cursor: pointer;
+      transition: all 0.08s ease;
+    }
+
+    .boost-btn:active {
+      transform: translateY(5px);
+      box-shadow: none;
+    }
+
+    .boost-btn.active {
+      background: #ff6b35 !important;
+      color: #fff !important;
+      border-color: #c44b15 !important;
+      box-shadow: 0 5px 0 #c44b15 !important;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+
+    .power-input.boost-active {
+      background: #fff3cd !important;
+      border-color: #ff6b35 !important;
+      color: #c44b15 !important;
+      box-shadow: 0 0 12px rgba(255, 107, 53, 0.5) !important;
     }
 
     .end-turn-btn {
@@ -579,9 +657,14 @@
         FRONT TRIGGER
       </button>
 
-      <button class="game-btn persona-btn" id="personaBtn" onclick="togglePersona()">
-        PERSONA
-      </button>
+      <div class="persona-row">
+        <button class="game-btn persona-btn" id="personaBtn10k" onclick="togglePersona('10k')">
+          PERSONA 10K
+        </button>
+        <button class="game-btn persona-btn" id="personaBtn15k" onclick="togglePersona('15k')">
+          PERSONA 15K
+        </button>
+      </div>
 
       <div class="power-grid">
         <input class="power-input" type="text" inputmode="numeric" value="0" />
@@ -595,6 +678,13 @@
         <input class="power-input" type="text" inputmode="numeric" value="0" />
 
         <input class="power-input" type="text" inputmode="numeric" value="0" />
+      </div>
+
+      <!-- BOOST BUTTONS -->
+      <div class="boost-row">
+        <button class="boost-btn" id="boostBtn3" onclick="toggleBoost(3)">⚡ BOOST</button>
+        <button class="boost-btn" id="boostBtn4" onclick="toggleBoost(4)">⚡ BOOST</button>
+        <button class="boost-btn" id="boostBtn5" onclick="toggleBoost(5)">⚡ BOOST</button>
       </div>
 
       <div class="power-label">VANGUARD POWER</div>
@@ -622,8 +712,9 @@
         <input id="modalBasePower" class="modal-input" type="text" inputmode="numeric" value="0" />
       </div>
 
-      <!-- Quick modifiers (+5000, +10000, -5000) -->
-      <div class="modal-quick-grid">
+      <!-- Quick modifiers (+3000, +5000, +10000, -5000) -->
+      <div class="modal-quick-grid" style="grid-template-columns: repeat(4,1fr);">
+        <button class="game-btn btn-plus" onclick="adjustAccumulator(3000)">+3000</button>
         <button class="game-btn btn-plus" onclick="adjustAccumulator(5000)">+5000</button>
         <button class="game-btn btn-plus" onclick="adjustAccumulator(10000)">+10000</button>
         <button class="game-btn btn-minus" onclick="adjustAccumulator(-5000)">-5000</button>
@@ -663,9 +754,87 @@
 
     let energy = parseInt(localStorage.getItem("energyTracker")) || 0;
 
-    function updateEnergy() {
-      document.getElementById("energyValue").textContent = energy;
+    /* ================================================================
+     COUNT-UP / COUNT-DOWN ANIMATION
+     ================================================================
+     countTo(el, fromVal, toVal, isInput, duration)
+     - el        : DOM element (div atau input)
+     - fromVal   : nilai awal (angka saat ini)
+     - toVal     : nilai tujuan
+     - isInput   : true → set el.value, false → set el.textContent
+     - duration  : durasi animasi dalam ms (default 700)
 
+     Menggunakan requestAnimationFrame untuk smooth counting.
+     WeakMap digunakan untuk membatalkan animasi sebelumnya jika
+     nilai berubah lagi sebelum animasi selesai.
+     ================================================================ */
+
+    const _rafIds   = new WeakMap(); // menyimpan rAF ID yang sedang berjalan
+    const _targets  = new WeakMap(); // menyimpan target value terakhir per elemen
+
+    function countTo(el, fromVal, toVal, isInput, duration) {
+      duration = duration || 700;
+
+      // Batalkan animasi sebelumnya jika masih berjalan
+      if (_rafIds.has(el)) {
+        cancelAnimationFrame(_rafIds.get(el));
+        _rafIds.delete(el);
+      }
+
+      if (fromVal === toVal) {
+        // Tidak ada perubahan – pastikan nilai final sudah terpasang
+        if (isInput) el.value = toVal;
+        else el.textContent = toVal;
+        return;
+      }
+
+      _targets.set(el, toVal);
+
+      // Tambahkan class warna selama counting berlangsung
+      el.classList.remove('num-counting-up', 'num-counting-down');
+      void el.offsetWidth; // force reflow agar animasi CSS bisa diulang
+      if (toVal > fromVal) el.classList.add('num-counting-up');
+      else                 el.classList.add('num-counting-down');
+
+      // Easing: ease-out quart  →  cepat di awal, melambat di akhir
+      function easeOutQuart(t) {
+        return 1 - Math.pow(1 - t, 4);
+      }
+
+      const startTime = performance.now();
+      const diff = toVal - fromVal;
+
+      function tick(now) {
+        const elapsed  = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased    = easeOutQuart(progress);
+        const current  = Math.round(fromVal + diff * eased);
+
+        if (isInput) el.value = current;
+        else         el.textContent = current;
+
+        if (progress < 1) {
+          _rafIds.set(el, requestAnimationFrame(tick));
+        } else {
+          // Pastikan nilai akhir tepat
+          if (isInput) el.value = toVal;
+          else         el.textContent = toVal;
+
+          _rafIds.delete(el);
+
+          // Hapus class warna setelah animasi selesai
+          el.classList.remove('num-counting-up', 'num-counting-down');
+        }
+      }
+
+      _rafIds.set(el, requestAnimationFrame(tick));
+    }
+
+    function updateEnergy() {
+      const el     = document.getElementById("energyValue");
+      const oldVal = _targets.has(el) ? _targets.get(el) : (parseInt(el.textContent) || 0);
+      _targets.set(el, energy);
+      countTo(el, oldVal, energy, false);
       localStorage.setItem("energyTracker", energy);
     }
 
@@ -705,7 +874,14 @@
       { basePower: 0, buttonAccumulator: 0, plusPower: 0, minusPower: 0, overTrigger: false }
     ];
 
-    let personaActive = localStorage.getItem("personaActive") === "true";
+    // personaActive: null = off, '10k' = 10k active, '15k' = 15k active
+    let personaActive = localStorage.getItem("personaActive") || null;
+    if (personaActive === "true") personaActive = "10k"; // migrate old value
+    if (personaActive === "false" || personaActive === "null") personaActive = null;
+
+    // boostActive[i]: true if boost for bottom row index i (3,4,5) is active
+    let boostActive = [false, false, false]; // index 0→tracker3, 1→tracker4, 2→tracker5
+
     let currentEditingIndex = -1;
     let tempState = {};
 
@@ -732,13 +908,34 @@
         const state = powerStates[index];
         const total = state.basePower + state.buttonAccumulator + state.plusPower - state.minusPower;
 
-        let displayVal = total;
-        if (personaActive && index < 3) {
-          displayVal += 10000;
+        let personaBonus = 0;
+        if (personaActive === '10k' && index < 3) personaBonus = 10000;
+        if (personaActive === '15k' && index < 3) personaBonus = 15000;
+
+        // Calculate boost: bottom row (3,4,5) adds its total to the corresponding top row (0,1,2)
+        let boostBonus = 0;
+        if (index < 3 && boostActive[index]) {
+          const bottomState = powerStates[index + 3];
+          const bottomTotal = bottomState.basePower + bottomState.buttonAccumulator + bottomState.plusPower - bottomState.minusPower;
+          boostBonus = bottomTotal;
         }
 
-        input.value = displayVal;
+        const displayVal = total + personaBonus + boostBonus;
+
+        // Baca fromVal dari target terakhir (bukan dari input.value yang mungkin
+        // masih di tengah animasi counting), agar counter mulai dari angka yang benar.
+        const fromVal = _targets.has(input) ? _targets.get(input) : (parseInt(input.value) || 0);
+        _targets.set(input, displayVal);
+        countTo(input, fromVal, displayVal, true);
+
         localStorage.setItem("power_" + index, displayVal);
+
+        // Handle boost-active highlight for bottom row inputs
+        if (index >= 3 && boostActive[index - 3]) {
+          input.classList.add("boost-active");
+        } else {
+          input.classList.remove("boost-active");
+        }
 
         if (state.overTrigger) {
           input.classList.add("over-trigger");
@@ -748,20 +945,38 @@
       });
     }
 
-    function updatePersonaBtn() {
-      const btn = document.getElementById("personaBtn");
-      if (personaActive) {
-        btn.classList.add("active");
-      } else {
-        btn.classList.remove("active");
-      }
+    function updatePersonaBtns() {
+      const btn10k = document.getElementById("personaBtn10k");
+      const btn15k = document.getElementById("personaBtn15k");
+      btn10k.classList.toggle("active", personaActive === '10k');
+      btn15k.classList.toggle("active", personaActive === '15k');
     }
 
-    function togglePersona() {
-      personaActive = !personaActive;
+    function togglePersona(type) {
+      if (personaActive === type) {
+        personaActive = null;
+      } else {
+        personaActive = type;
+      }
       localStorage.setItem("personaActive", personaActive);
-      updatePersonaBtn();
+      updatePersonaBtns();
       updateGridDisplay();
+    }
+
+    function toggleBoost(trackerIndex) {
+      // trackerIndex is the full index (3, 4, or 5)
+      const boostIdx = trackerIndex - 3;
+      boostActive[boostIdx] = !boostActive[boostIdx];
+      updateBoostBtns();
+      updateGridDisplay();
+    }
+
+    function updateBoostBtns() {
+      [3, 4, 5].forEach((trackerIndex) => {
+        const boostIdx = trackerIndex - 3;
+        const btn = document.getElementById("boostBtn" + trackerIndex);
+        btn.classList.toggle("active", boostActive[boostIdx]);
+      });
     }
 
     function triggerFrontTrigger() {
@@ -786,11 +1001,14 @@
     }
 
     function endTurn() {
-      if (personaActive) {
-        personaActive = false;
-        localStorage.setItem("personaActive", personaActive);
-        updatePersonaBtn();
-      }
+      // Reset persona
+      personaActive = null;
+      localStorage.setItem("personaActive", null);
+      updatePersonaBtns();
+
+      // Reset boosts
+      boostActive = [false, false, false];
+      updateBoostBtns();
 
       for (let i = 0; i < 6; i++) {
         powerStates[i].buttonAccumulator = 0;
@@ -835,8 +1053,11 @@
       tempState.plusPower = plus;
       tempState.minusPower = minus;
 
-      const total = tempState.basePower + tempState.buttonAccumulator + tempState.plusPower - tempState.minusPower;
-      modalTotalDisplay.textContent = total;
+      const total    = tempState.basePower + tempState.buttonAccumulator + tempState.plusPower - tempState.minusPower;
+      const el       = modalTotalDisplay;
+      const fromVal  = _targets.has(el) ? _targets.get(el) : (parseInt(el.textContent) || 0);
+      _targets.set(el, total);
+      countTo(el, fromVal, total, false, 600);
     }
 
     function adjustAccumulator(amount) {
@@ -905,7 +1126,8 @@
     });
 
     // Initial page load updates
-    updatePersonaBtn();
+    updatePersonaBtns();
+    updateBoostBtns();
     updateGridDisplay();
   </script>
 </body>
