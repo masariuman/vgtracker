@@ -1230,6 +1230,36 @@
     updateBoostBtns();
     updateGridDisplay();
   </script>
-</body>
+
+  <script type="text/javascript">
+    //no right click
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    document.addEventListener('keydown', function (e) {
+      // Ctrl + C
+      if (e.ctrlKey && e.keyCode == 67) {
+        e.preventDefault();
+        return false;
+      }
+      // Ctrl + U
+      if (e.ctrlKey && e.keyCode == 85) {
+        e.preventDefault();
+        return false;
+      }
+      // F12
+      if (e.keyCode == 123) {
+        e.preventDefault();
+        return false;
+      }
+      // Ctrl + S
+      if (e.ctrlKey && e.keyCode == 83) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  </script>
+
+  <body onselectstart="return false" oncontextmenu="return false">
+  </body>
 
 </html>
